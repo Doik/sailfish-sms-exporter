@@ -13,7 +13,8 @@ import sqlite3
 from datetime import datetime
 
 jolla_db_filename = 'commhistory.db'
-target_filename = 'out.xml'
+sms_filename = 'sms.xml'
+calls_filename = 'calls.xml'
 
 
 def encode_xml(text):
@@ -85,7 +86,41 @@ for entry in entries:
 
 out += "\n</smses>"
 
-with open(target_filename, 'w') as fp:
+with open(sms_filename, 'w') as fp:
+    fp.write(out)
+
+cursor = connection.cursor()
+cursor.execute("SELECT * FROM Events WHERE type=3")
+entries = cursor.fetchall()
+
+out = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<!--File Created on {date}-->
+<?xml-stylesheet type="text/xsl" href="calls.xsl"?>
+<calls count="{count}" backup_date="">""".format(count=len(entries), date=date.strftime("%d/%m/%y %H:%M:%S"))
+
+for entry in entries:
+    if entry[cols.index('isMissedCall')]:
+        calltype = 3
+    else:
+        calltype = entry[cols.index('direction')]
+    date = datetime.fromtimestamp(entry[cols.index('startTime')])
+    out += """<call
+    type="{type}"
+    number="{number}"
+    contact_name="{name}"
+    date="{date}"
+    readable_date="{readble_date}"
+    duration="{duration}"/>\n""".format(
+        type=calltype,
+        number=entry[cols.index('remoteUid')],
+        name="",
+        date=entry[cols.index('startTime')] * 1000,
+        readble_date=date.strftime("%d.%m.%Y %H:%M:%S"),
+        duration=entry[cols.index('endTime')] - entry[cols.index('startTime')]
+    )
+out += "\n</calls>"
+
+with open(calls_filename, 'w') as fp:
     fp.write(out)
 
 print("Done")
