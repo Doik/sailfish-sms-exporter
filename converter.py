@@ -28,7 +28,6 @@ def encode_xml(text):
 
 cols = ["id", "type", "startTime", "endTime", "direction", "isDraft", "isRead", "isMissedCall", "isEmergencyCall", "status", "bytesReceived", "localUid", "remoteUid", "parentId", "subject", "freeText", "groupId", "messageToken", "lastModified", "vCardFileName", "vCardLabel", "isDeleted", "reportDelivery", "validityPeriod", "contentLocation", "messageParts", "headers", "readStatus", "reportRead", "reportedReadRequested", "mmsId", "isAction", "hasExtraProperties", "hasMessageParts"]
 
-
 connection = sqlite3.connect(jolla_db_filename)
 cursor = connection.cursor()
 cursor.execute("SELECT * FROM Events WHERE type=2")
@@ -41,16 +40,11 @@ out = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <?xml-stylesheet type="text/xsl" href="sms.xsl"?>
 <smses count="{count}">""".format(count=len(entries), date=date.strftime("%d/%m/%y %H:%M:%S"))
 
-# type: Android             Sailfish
-# 1 = msg rcvd              1
-# 2 = msg sent              2
-# 3 = msg draft
-
 for entry in entries:
     direction = entry[cols.index('direction')]
     # if direction == 2 and not entry[cols.index('remoteUid')]:
     #     continue
-    date = datetime.fromtimestamp(entry[cols.index('startTime')])
+    sentdate = datetime.fromtimestamp(entry[cols.index('startTime')])
     out += """<sms
     protocol="{protocol}"
     address="{address}"
@@ -80,7 +74,7 @@ for entry in entries:
         status=-1,
         locked=0,
         date_sent=(0 if direction == 2 else entry[cols.index('startTime')] * 1000),
-        readable_date=date.strftime("%d.%m.%Y %H:%M:%S"),
+        readable_date=sentdate.strftime("%d.%m.%Y %H:%M:%S"),
         contact_name=""
     )
 
@@ -96,7 +90,7 @@ entries = cursor.fetchall()
 out = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <!--File Created on {date}-->
 <?xml-stylesheet type="text/xsl" href="calls.xsl"?>
-<calls count="{count}" backup_date="">""".format(count=len(entries), date=date.strftime("%d/%m/%y %H:%M:%S"))
+<calls count="{count}">""".format(count=len(entries), date=date.strftime("%d/%m/%y %H:%M:%S"))
 
 for entry in entries:
     if entry[cols.index('isMissedCall')]:
