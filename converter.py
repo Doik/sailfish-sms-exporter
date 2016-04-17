@@ -36,7 +36,7 @@ entries = cursor.fetchall()
 date = datetime.now()
 
 out = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
-<!--File Created By Sailfish2Android for SMS Backup & Restore v7.44 on {date}-->
+<!--File Created on {date}-->
 <?xml-stylesheet type="text/xsl" href="sms.xsl"?>
 <smses count="{count}">""".format(count=len(entries), date=date.strftime("%d/%m/%y %H:%M:%S"))
 
@@ -47,10 +47,10 @@ out = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 
 for entry in entries:
     direction = entry[cols.index('direction')]
-    if direction == 2 and not entry[cols.index('remoteUid')]:
-        continue
+    # if direction == 2 and not entry[cols.index('remoteUid')]:
+    #     continue
     date = datetime.fromtimestamp(entry[cols.index('startTime')])
-    out += """\n<sms
+    out += """<sms
     protocol="{protocol}"
     address="{address}"
     date="{date}"
@@ -65,7 +65,7 @@ for entry in entries:
     locked="{locked}"
     date_sent="{date_sent}"
     readable_date="{readable_date}"
-    contact_name="{contact_name}" />""".format(
+    contact_name="{contact_name}" />\n""".format(
         protocol=0,
         address=entry[cols.index('remoteUid')],
         date=entry[cols.index('startTime')] * 1000,
@@ -80,7 +80,7 @@ for entry in entries:
         locked=0,
         date_sent=(0 if direction == 2 else entry[cols.index('startTime')] * 1000),
         readable_date=date.strftime("%d.%m.%Y %H:%M:%S"),
-        contact_name="??"
+        contact_name=""
     )
 
 out += "\n</smses>"
