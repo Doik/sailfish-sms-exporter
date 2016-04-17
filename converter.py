@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Convert sailfish sms to xml to be imported to android phones.
+Convert sailfish sms and call history to xml to be imported to android phones.
 
 Reads a sailfish commhistory.db (which can be found in `/home/nemo/.local/share/commhistory`)
 and creates a xml-file of all contained sms that is understood by the Android Application
