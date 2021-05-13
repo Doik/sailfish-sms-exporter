@@ -80,7 +80,7 @@ for entry in entries:
 
 out += "\n</smses>"
 
-with open(sms_filename, 'w') as fp:
+with open(sms_filename, 'w', encoding="utf-8") as fp:
     fp.write(out)
 
 cursor = connection.cursor()
@@ -114,7 +114,7 @@ for entry in entries:
     )
 out += "\n</calls>"
 
-with open(calls_filename, 'w') as fp:
+with open(calls_filename, 'w', encoding="utf-8") as fp:
     fp.write(out)
 
 print("Done")
